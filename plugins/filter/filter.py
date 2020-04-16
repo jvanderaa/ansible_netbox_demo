@@ -30,31 +30,6 @@ class FilterModule:
         }
 
     @staticmethod
-    def get_role_from_hostname(hostname):
-        """
-        Method to get a role from the hostname
-
-        Args:
-            hostname (string): String representation of the hostname
-        """
-        if "sw" in hostname:
-            return "Switch"
-
-        if "rtr" in hostname:
-            return "Router"
-
-        if "fw" in hostname:
-            return "Firewall"
-
-        if "nxos" in hostname:
-            return "Switch"
-
-        if "veos" in hostname:
-            return "Switch"
-
-        return None
-
-    @staticmethod
     def get_ciscoios_serial_list(ansible_facts):
         """
         Goal: Take information in Ansible Facts and return a list of serial numbers for the logical
@@ -62,15 +37,19 @@ class FilterModule:
         serial numbers. If it is a single unit then it should return the single serial number within
         a list.
 
-        Ansible_facts HERE
-        """
-        # Check that net_serialnum exists, returning the string back as a list of one
-        if ansible_facts.get("net_serialnum") is not None:
-            return [ansible_facts.get("net_serialnum")]
+        ansible_net_serialnum (string)         The serial number of the remote device
 
+        ansible_net_stacked_serialnums (list)  when multiple devices are configured in a stack 	
+                                                The serial numbers of each device in the stack
+
+        """
         # Check if net_stacked_serialnums exists, then return it
         if ansible_facts.get("net_stacked_serialnums") is not None:
             return ansible_facts.get("net_stacked_serialnums")
+        
+        # Check that net_serialnum exists, returning the string back as a list of one
+        if ansible_facts.get("net_serialnum") is not None:
+            return [ansible_facts.get("net_serialnum")]
 
         return None
 
@@ -109,6 +88,31 @@ class FilterModule:
         netbox_serials_set = set(netbox_serial_numbers)
 
         return device_serials_set == netbox_serials_set
+
+    @staticmethod
+    def get_role_from_hostname(hostname):
+        """
+        Method to get a role from the hostname
+
+        Args:
+            hostname (string): String representation of the hostname
+        """
+        if "sw" in hostname:
+            return "Switch"
+
+        if "rtr" in hostname:
+            return "Router"
+
+        if "fw" in hostname:
+            return "Firewall"
+
+        if "nxos" in hostname:
+            return "Switch"
+
+        if "veos" in hostname:
+            return "Switch"
+
+        return None
 
     @staticmethod
     def get_interface_by_bandwidth(bandwidth_value):
