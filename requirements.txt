@@ -1,0 +1,11 @@
+ansible
+ansible-lint
+bandit
+black
+paramiko
+pylint
+pynetbox
+pytest
+pytest-pythonpath
+textfsm
+yamllint

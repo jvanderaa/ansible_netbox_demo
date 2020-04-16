@@ -1,0 +1,93 @@
+---
+- name: "PLAY 1: SETUP CLUSTER"
+  connection: local
+  hosts: localhost
+  vars:
+    vms:
+        - { name: gns3, address: 192.168.0.101/24 }
+        - { name: awx, address: 192.168.0.102/24 }
+        - { name: netbox03, address: 192.168.0.103/24 }
+        - { name: prometheus, address: 192.168.0.104/24 }
+        - { name: docker01, address: 192.168.0.105/24 }
+        - { name: docker02, address: 192.168.0.106/24 }
+    pves:
+        - { name: pve01, address: "192.168.0.254/24" }
+        - { name: pve02, address: "192.168.0.253/24" }
+    netbox_headers:
+      Content-Type: "application/json"
+      Authorization: "token {{ lookup('ENV', 'NETBOX_API_KEY') }}"
+    netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+    netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+  tasks:
+    - name: "TASK 0: CREATE CLUSTER TYPE"
+      netbox.netbox.netbox_cluster_type:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: Proxmox
+        state: present
+
+    - name: "TASK 1: SYS >> ADD VM CLUSTER"
+      netbox.netbox.netbox_cluster:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: JoshV_Cluster1
+          cluster_type: Proxmox
+        state: present
+
+    - name: "TASK 2: SYS >> CREATE CLUSTER HOSTS"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ item.name }}"
+          device_type: CustomServer
+          device_role: Server
+          site: minnesota01
+      loop: "{{ pves }}"
+      
+    - name: "TASK 3: SYS >> SETUP SOME VMs"
+      netbox.netbox.netbox_virtual_machine:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ item.name }}"
+          cluster: JoshV_Cluster1
+        state: present
+      loop: "{{ vms }}"
+
+    - name: "TASK 4: SYS >> Create interfaces"
+      netbox.netbox.netbox_vm_interface:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          virtual_machine: "{{ item.name }}"
+          name: eth0
+        state: present
+      loop: "{{ vms }}"
+
+    - name: "TASK 5: SYS >> ASSIGN IP TO VM"
+      uri:
+        url: "{{ lookup('ENV', 'NETBOX_URL') }}/api/ipam/ip-addresses/"
+        method: POST
+        headers: "{{ netbox_headers }}"
+        status_code: 201
+        body_format: json
+        body: {
+          "address": "{{ item.address }}",
+          "status": 1,
+          "interface": "{{ item.name | get_interface_id(netbox_headers) }}"
+        }
+      loop: "{{ vms }}"
+
+    - name: "TASK 6: SYS >> ASSIGN PRIMARY ADDRESS TO THE DEVICE"
+      netbox.netbox.netbox_virtual_machine:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ item.name }}"
+          cluster: JoshV_Cluster1
+          primary_ip4: "{{ item.address }}"
+        state: present
+      loop: "{{ vms }}"

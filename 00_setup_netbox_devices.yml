@@ -1,0 +1,210 @@
+---
+- name: "PLAY 1: SETUP DEVICES WITHIN NETBOX"
+  hosts: localhost
+  connection: local
+  vars:
+    install_state: present
+  tasks:
+    - name: "TASK 1: SETUP SITES"
+      netbox.netbox.netbox_site:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "MINNESOTA01"
+          time_zone: America/Chicago
+          status: active
+          description: Dev
+          contact_name: Josh
+          contact_email: josh@josh-v.com
+        state: "{{ install_state }}"
+      register: site_setup
+      tags: [ sites, devices ]
+
+    - name: "TASK 2: SETUP RACKS"
+      netbox.netbox.netbox_rack:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "MN_01"
+          site: "MINNESOTA01"
+        state: "{{ install_state }}"
+      tags: [ sites, devices ]
+
+    - name: "TASK 3: SETUP MANUFACTURERS"
+      netbox.netbox.netbox_manufacturer:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ item }}"
+        state: "{{ install_state }}"
+      loop:
+        - Arista
+        - Cisco
+        - CustomBuild
+        - Raspberry Pi
+      tags: [ devices ]
+
+    - name: "TASK 4: SETUP DEVICE TYPES"
+      netbox.netbox.netbox_device_type:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          model: "{{ item.model }}"
+          manufacturer: "{{ item.manufacturer }}"
+          slug: "{{ item.slug }}"
+          part_number: "{{ item.part_number }}"
+          u_height: 1
+          is_full_depth: "{{ item.full_depth }}"
+        state: "{{ install_state }}"
+      loop:
+        - {"model": "IOSv", "manufacturer": "Cisco", "slug": "iosv", "part_number": "iosv", "full_depth": False}
+        - {"model": "nxosv", "manufacturer": "Cisco", "slug": "nxosv", "part_number": "nxosv", "full_depth": False}
+        - {"model": "nx-osv-chassis-nx-osv-supervisor-module", "manufacturer": "Cisco", "slug": "nx-osv-chassis-nx-osv-supervisor-module", "part_number": "nx-osv-chassis-nx-osv-supervisor-module", "full_depth": False}
+        - {"model": "CSR1000v", "manufacturer": "Cisco", "slug": "csr1000v", "part_number": "csr1000v", "full_depth": False}
+        - {"model": "ASAv", "manufacturer": "Cisco", "slug": "asav", "part_number": "asav", "full_depth": False}
+        - {"model": "CustomServer", "manufacturer": "CustomBuild", "slug": "customserver", "part_number": "home", "full_depth": True}
+        - {"model": "vEOS", "manufacturer": "Arista", "slug": "veos", "part_number": "veos", "full_depth": False}
+      tags: [ devices ]
+
+    - name: "TASK 5: SETUP PLATFORMS"
+      netbox.netbox.netbox_platform:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ item.name }}"
+          slug: "{{ item.slug }}"
+        state: "{{ install_state }}"
+      loop:
+        - { name: EOS, slug: eos }
+        - { name: IOS, slug: ios }
+        - { name: IOS-XE, slug: ios-xe }
+        - { name: NXOS, slug: nxos }
+        - { name: Raspbian, slug: raspbian }
+        - { name: Ubuntu 18.04, slug: ubuntu1804 }
+        - { name: Ubuntu 16.04, slug: ubuntu1604 }
+        - { name: Ubuntu 20.04, slug: ubuntu2004 }
+        - { name: Windows 2012, slug: win2012 }
+        - { name: Windows 2016, slug: win2016 }
+        - { name: Windows 2019, slug: win2019 }
+      tags: [ devices ]
+      
+    - name: "TASK 6: SETUP DEVICE ROLES"
+      netbox.netbox.netbox_device_role:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ item.name }}"
+          color: "{{ item.color }}"
+          vm_role: "{{ item.vmrole }}"
+        state: "{{ install_state }}"
+      loop:
+        - { name: Firewall, color: FF0000, vmrole: true }
+        - { name: Router, color: 000080, vmrole: true }
+        - { name: Switch, color: 008000, vmrole: true }
+        - { name: Server, color: "000000", vmrole: false }
+        - { name: VM, color: 00FFFF, vmrole: true }
+        - { name: Leaf, color: 008000, vmrole: false }
+        - { name: Spine, color: 0000FF, vmrole: false }
+      tags: [ devices ]
+      
+    - name: "TASK 7: SETUP VLANS"
+      netbox.netbox.netbox_vlan:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "VLAN{{ item.vid }}"
+          vid: "{{ item.vid }}"
+          site: "MINNESOTA01"
+          description: "{{ item.desc }}"
+        state: "{{ install_state }}"
+      register: result
+      tags: [ ipam ]
+      loop:
+        - { vid: 100, desc: Demo VLAN }
+        - { vid: 200, desc: Primary VLAN }
+        - { vid: 300, desc: Secondary VLAN }
+      
+    - name: "TASK 8: SETUP RFC1918 RIR"
+      netbox.netbox.netbox_rir:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: RFC1918
+          is_private: True
+        state: "{{ install_state }}"
+      tags: [ ipam ]
+
+    - name: "TASK 8: SETUP AGGREGRATES"
+      netbox.netbox.netbox_aggregate:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          prefix: "{{ item.name }}"
+          description: "{{ item.desc }}"
+          rir: RFC1918
+        state: "{{ install_state }}"
+      loop:
+        - { name: "10.0.0.0/8", desc: RFC1918 - 10 }
+        - { name: "172.16.0.0/12", desc: RFC1918 - 172 }
+        - { name: "192.0.2.0/24", desc: RFC5735 - 192.0.2.0 }
+        - { name: "192.168.0.0/16", desc: RFC1918 - 192 }
+      tags: [ ipam ]
+
+    - name: "TASK 9: SETUP PREFIXES"
+      netbox.netbox.netbox_prefix:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          family: 4
+          prefix: "{{ item.prefix }}"
+          site: "MINNESOTA01"
+          status: Active
+          description: "{{ item.desc }}"
+          is_pool: "{{ item.ispool }}"
+        state: "{{ install_state }}"
+      loop:
+        - { prefix: 10.50.50.0/24, desc: GNS3 Loopbacks, ispool: true }
+        - { prefix: 172.31.0.0/24, desc: GNS3 - DC, ispool: false }
+        - { prefix: 172.31.1.0/24, desc: GNS3 - DC Mgmt, ispool: false }
+        - { prefix: 192.168.0.0/24, desc: GNS3 Remote, ispool: false }
+        - { prefix: 192.0.2.0/24, desc: Example Network, ispool: true }
+      tags: [ ipam ]
+
+    - name: "TASK 10: SETUP CIRCUIT PROVIDER"
+      netbox.netbox.netbox_provider:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: Charter Spectrum
+          asn: 7843
+          account: AGOODPAYING_ONE
+          portal_url: http://spectrum.net
+          noc_contact: noc@spectrum.net
+          comments: "BEST I CAN GET"
+        state: "{{ install_state }}"
+      tags: [ circuit ]
+
+    - name: Create type within Netbox with only required information
+      netbox.netbox.netbox_circuit_type:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: Cable
+        state: "{{ install_state }}"
+      tags: [ circuit ]
+
+    - name: "CREATE LOCAL CIRCUIT"
+      netbox.netbox.netbox_circuit:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          cid: my-circuit-id
+          provider: Charter Spectrum
+          circuit_type: Cable
+          status: Active
+          install_date: "2016-06-01"
+          commit_rate: 200000000
+          description: Charter Spectrum Cable Internet
+          comments: "Delivered"
+        state: "{{ install_state }}"
+      tags: [ circuit ]

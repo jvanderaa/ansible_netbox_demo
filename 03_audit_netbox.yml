@@ -1,0 +1,62 @@
+---
+# Playbook to read information from device and netbox and compare
+- name: "PLAY 1: READ NETWORK DEVICE INFORMATION AND COMPARE NETBOX"
+  hosts: platforms_ios, platforms_eos, platforms_nxos
+  become: yes
+  become_method: enable
+  connection: network_cli
+  gather_facts: yes
+  vars:
+    netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+    netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+    netbox_headers:
+      Content-Type: "application/json"
+      Authorization: "token {{ netbox_token }}"
+    netbox_serial_list: []
+    device_serial_list: []
+  tasks:
+    - name: "TASK 1A: NXOS >> GET NXOS FACTS"
+      nxos_facts:
+        gather_subset: "!config"
+      when: "ansible_network_os == 'nxos'"
+
+    - name: "TASK 1B: IOS >> GET IOS FACTS"
+      ios_facts:
+        gather_subset: "!config"
+      when: "ansible_network_os == 'ios'"
+
+    - name: "TASK 1C: EOS >> GATHER FACTS FROM DEVICE"
+      eos_facts:
+        gather_subset: "!config"
+      when: "ansible_network_os == 'eos'"
+
+    - name: "TASK 2: NETBOX >> GATHER NETBOX DATA"
+      uri:
+        url: "{{ netbox_url }}/api/dcim/devices/?q={{ inventory_hostname }}"
+        headers: "{{ netbox_headers }}"
+        method: GET
+        status_code: 200
+      register: netbox_device_results
+
+    - name: "TASK 3: SYS >> BUILD NETBOX SERIAL NUMBER LIST FROM NETBOX RESPONSES"
+      set_fact:
+        netbox_serial_list: "{{ netbox_serial_list + [ item.serial ] }}"
+      loop: "{{ netbox_device_results['json']['results'] }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: "TASK 4: SYS >> BUILD IOS DEVICE SERIAL LIST USING FILTER"
+      set_fact:
+        device_serial_list: "{{ ansible_facts | get_ciscoios_serial_list }}"
+
+    - name: "TASK 5: SYS >> VERIFY DEVICE DATA VS NETBOX - CUSTOM FILTER"
+      assert:
+        that:
+          - "device_serial_list | compare_lists(netbox_serial_list)"
+        fail_msg: 
+          - "Device Serial List: {{ device_serial_list }}"
+          - "NetBox Serial List: {{ netbox_serial_list }}"
+        success_msg:
+          - "Device Serial List: {{ device_serial_list }}"
+          - "NetBox Serial List: {{ netbox_serial_list }}"
+...

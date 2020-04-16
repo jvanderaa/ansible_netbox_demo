@@ -1,0 +1,74 @@
+---
+- name: "PLAY 1: ADD INTERFACES TO NETBOX AND CLEANUP TEMP"
+  connection: network_cli
+  hosts: platforms_nxos, platforms_ios, platforms_eos
+  tags: [ ios, nxos ]
+  tasks:
+    - name: "TASK 1A: NXOS >> GET NXOS FACTS"
+      nxos_facts:
+        gather_subset: "!config"
+      when: "ansible_network_os == 'nxos'"
+
+    - name: "TASK 1B: IOS >> GET IOS FACTS"
+      ios_facts:
+        gather_subset: "!config"
+      when: "ansible_network_os == 'ios'"
+
+    - name: "TASK 1C: EOS >> GATHER FACTS FROM DEVICE"
+      eos_facts:
+        gather_subset: "!config"
+      when: "ansible_network_os == 'eos'"
+        
+    - name: "TASK 2: NETBOX >> ADD INTERFACES TO NETBOX"
+      netbox.netbox.netbox_device_interface:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          device: "{{ inventory_hostname }}"
+          name: "{{ item.key }}"
+          form_factor: "{{ item.key | get_interface_type }}"
+          mac_address: "{{ item.value.macaddress | convert_mac_address }}"
+        state: present
+      with_dict:
+        - "{{ ansible_facts['net_interfaces'] }}"
+      loop_control:
+        label: "{{ item.key }}"
+
+    - name: "TASK 3: NETBOX >> ADD IP ADDRESSES TO PROPER INTERFACE"
+      netbox.netbox.netbox_ip_address:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          family: 4
+          address: "{{ item['address'] }}"
+          status: active
+          interface:
+            name: "{{ item['interface'] }}"
+            device: "{{ inventory_hostname }}"
+      with_items:
+        - "{{ ansible_facts | build_ipv4_from_facts }}"
+    
+    - name: "TASK 4: NETBOX >> REMOVE TEMPORARY INTERFACE"
+      netbox.netbox.netbox_device_interface:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          device: "{{ inventory_hostname }}"
+          name: Temporary_Interface
+          form_factor: Virtual
+        state: absent
+
+    - name: "TASK 5: NETBOX >> SET PRIMARY IP"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ inventory_hostname }}"
+          device_type: "{{ ansible_facts['net_model'] }}"
+          serial: "{{ ansible_facts['net_serialnum'] }}"
+          rack: MN_01
+          device_role: "{{ inventory_hostname | get_role_from_hostname }}"
+          primary_ip4: "{{ item['address'] }}"
+      with_items:
+        - "{{ ansible_facts | build_ipv4_from_facts }}"
+      when: "ansible_host == item['address'].split('/')[0]"

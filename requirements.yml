@@ -1,0 +1,6 @@
+---
+collections:
+  - netbox.netbox
+
+roles:
+  - name: ansible-network.network-engine

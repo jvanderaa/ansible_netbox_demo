@@ -1,0 +1,5 @@
+build-essential
+git
+iputils-ping
+openssh-client
+vim

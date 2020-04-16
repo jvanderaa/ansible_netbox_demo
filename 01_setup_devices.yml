@@ -1,0 +1,304 @@
+---
+# Playbook to setup devices from a static inventory list
+- name: "PLAY 1: SETUP vEOS"
+  connection: network_cli
+  hosts: eos
+  tasks:
+    - name: "TASK 1: EOS >> GATHER FACTS FROM DEVICE"
+      eos_facts:
+        gather_subset: "!config"
+
+    - name: "TASK 2: NETBOX >> ADD DEVICE TO NETBOX"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ inventory_hostname }}"
+          device_type: "{{ ansible_facts['net_model'] }}"
+          platform: EOS
+          serial: "{{ ansible_facts['net_serialnum'] }}"
+          rack: MN_01
+          position: "{{ rack_location }}"
+          face: "Front"
+          status: Active
+          device_role: "Leaf"
+          site: "MINNESOTA01"
+          custom_fields:
+            code_version: "{{ ansible_facts['net_version'] }}"
+          
+    - name: "TASK 3: NETBOX >> Add temporary interface"
+      netbox.netbox.netbox_device_interface:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          device: "{{ inventory_hostname }}"
+          name: Temporary_Interface
+          form_factor: Virtual
+        state: present
+
+    - name: "TASK 4: NETBOX >> ADD IP ADDRESS OF ANSIBLE HOST"
+      netbox.netbox.netbox_ip_address:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          family: 4
+          address: "{{ ansible_host }}/24"
+          status: active
+          interface:
+            name: Temporary_Interface
+            device: "{{ inventory_hostname }}"
+
+    - name: "TASK 5: NETBOX >> ADD DEVICE TO NETBOX"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ inventory_hostname }}"
+          device_type: "{{ ansible_facts['net_model'] }}"
+          platform: EOS
+          serial: "{{ ansible_facts['net_serialnum'] }}"
+          rack: MN_01
+          face: "Front"
+          status: Active
+          site: "MINNESOTA01"
+          primary_ip4: "{{ ansible_host }}/24"
+
+- name: "PLAY 2: ADD IOS"
+  connection: network_cli
+  hosts: routers, switches
+  tasks:
+    - name: "TASK 1: IOS >> GATHER FACTS FROM DEVICE"
+      ios_facts:
+        gather_subset: "!config"
+
+    - name: "TASK 2: NETBOX >> ADD DEVICE TO NETBOX"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ inventory_hostname }}"
+          device_type: "{{ ansible_facts['net_model'] }}"
+          platform: IOS
+          serial: "{{ ansible_facts['net_serialnum'] }}"
+          rack: MN_01
+          face: "Front"
+          status: Active
+          device_role: "{{ inventory_hostname | get_role_from_hostname }}"
+          site: "MINNESOTA01"
+          custom_fields:
+            code_version: "{{ ansible_facts['net_version'] }}"
+
+    - name: "TASK 3: Add temporary interface"
+      netbox.netbox.netbox_device_interface:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          device: "{{ inventory_hostname }}"
+          name: Temporary_Interface
+          form_factor: Virtual
+        state: present
+
+    - name: "TASK 4: ADD IP ADDRESS OF ANSIBLE HOST"
+      netbox.netbox.netbox_ip_address:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          family: 4
+          address: "{{ ansible_host }}/24"
+          status: active
+          interface:
+            name: Temporary_Interface
+            device: "{{ inventory_hostname }}"
+
+    - name: "TASK 5: ADD DEVICE TO NETBOX"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ inventory_hostname }}"
+          device_type: "{{ ansible_facts['net_model'] }}"
+          platform: IOS
+          serial: "{{ ansible_facts['net_serialnum'] }}"
+          rack: MN_01
+          face: "Front"
+          status: Active
+          device_role: "{{ inventory_hostname | get_role_from_hostname }}"
+          site: "MINNESOTA01"
+          primary_ip4: "{{ ansible_host }}/24"
+
+- name: "PLAY 3: ADD NXOS"
+  connection: network_cli
+  hosts: nxos
+  tags: [ nxos ]
+  tasks:
+    - name: "TASK 1: NXOS >> GATHER FACTS FROM DEVICE"
+      nxos_facts:
+        gather_subset: "!config"
+
+    - name: "TASK 2: ADD DEVICE TO NETBOX"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ inventory_hostname }}"
+          device_type: "{{ ansible_facts['net_model'] }}"
+          platform: NXOS
+          serial: "{{ ansible_facts['net_serialnum'] }}"
+          rack: MN_01
+          face: "Front"
+          status: Active
+          device_role: "{{ inventory_hostname | get_role_from_hostname }}"
+          site: "MINNESOTA01"
+          custom_fields:
+            code_version: "{{ ansible_facts['net_version'] }}"
+          
+    - name: "TASK 3: Add temporary interface"
+      netbox.netbox.netbox_device_interface:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          device: "{{ inventory_hostname }}"
+          name: Temporary_Interface
+          form_factor: Virtual
+        state: present
+
+    - name: "TASK 4: ADD IP ADDRESS OF ANSIBLE HOST"
+      netbox.netbox.netbox_ip_address:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          family: 4
+          address: "{{ ansible_host }}/24"
+          status: active
+          interface:
+            name: Temporary_Interface
+            device: "{{ inventory_hostname }}"
+
+    - name: "TASK 5: ADD DEVICE TO NETBOX"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ inventory_hostname }}"
+          device_type: "{{ ansible_facts['net_model'] }}"
+          platform: NXOS
+          serial: "{{ ansible_facts['net_serialnum'] }}"
+          rack: MN_01
+          face: "Front"
+          status: Active
+          device_role: "{{ inventory_hostname | get_role_from_hostname }}"
+          site: "MINNESOTA01"
+          primary_ip4: "{{ ansible_host }}/24"
+
+- name: "PLAY 4: Add BLANK NODE"
+  connection: local
+  hosts: localhost
+  tags: [ setup_demo ]
+  tasks:
+
+    - name: "TASK 1: ADD DEVICE TO NETBOX"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "sw-1:2"
+          device_type: "IOSv"
+          platform: IOS
+          serial: "ANSIBLE_FTW"
+          rack: MN_01
+          status: Active
+          device_role: "Switch"
+          site: "MINNESOTA01"
+
+- name: "PLAY 5: SETUP CLUSTER"
+  connection: local
+  hosts: localhost
+  vars:
+    vms:
+        - { name: gns3, address: 192.168.0.101/24 }
+        - { name: awx, address: 192.168.0.102/24 }
+        - { name: netbox03, address: 192.168.0.103/24 }
+        - { name: prometheus, address: 192.168.0.104/24 }
+        - { name: docker01, address: 192.168.0.105/24 }
+        - { name: docker02, address: 192.168.0.106/24 }
+    pves:
+        - { name: pve01, address: "192.168.0.254/24" }
+        - { name: pve02, address: "192.168.0.253/24" }
+    netbox_headers:
+      Content-Type: "application/json"
+      Authorization: "token {{ lookup('ENV', 'NETBOX_API_KEY') }}"
+    netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+    netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+  tasks:
+    - name: "TASK 0: CREATE CLUSTER TYPE"
+      netbox.netbox.netbox_cluster_type:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: Proxmox
+        state: present
+
+    - name: "TASK 1: SYS >> ADD VM CLUSTER"
+      netbox.netbox.netbox_cluster:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: JoshV_Cluster1
+          cluster_type: Proxmox
+        state: present
+
+    - name: "TASK 2: SYS >> CREATE CLUSTER HOSTS"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ item.name }}"
+          device_type: CustomServer
+          device_role: Server
+          site: minnesota01
+      loop: "{{ pves }}"
+      
+    - name: "TASK 3: SYS >> SETUP SOME VMs"
+      netbox.netbox.netbox_virtual_machine:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ item.name }}"
+          cluster: JoshV_Cluster1
+        state: present
+      loop: "{{ vms }}"
+
+    - name: "TASK 4: SYS >> Create interfaces"
+      netbox.netbox.netbox_vm_interface:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          virtual_machine: "{{ item.name }}"
+          name: eth0
+        state: present
+      loop: "{{ vms }}"
+
+    - name: "TASK 5: SYS >> ASSIGN IP TO VM"
+      uri:
+        url: "{{ lookup('ENV', 'NETBOX_URL') }}/api/ipam/ip-addresses/"
+        method: POST
+        headers: "{{ netbox_headers }}"
+        status_code: 201
+        body_format: json
+        body: {
+          "address": "{{ item.address }}",
+          "status": 1,
+          "interface": "{{ item.name | get_interface_id(netbox_headers) }}"
+        }
+      loop: "{{ vms }}"
+
+    - name: "TASK 6: SYS >> ASSIGN PRIMARY ADDRESS TO THE DEVICE"
+      netbox.netbox.netbox_virtual_machine:
+        netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
+        netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
+        data:
+          name: "{{ item.name }}"
+          cluster: JoshV_Cluster1
+          primary_ip4: "{{ item.address }}"
+        state: present
+      loop: "{{ vms }}"
