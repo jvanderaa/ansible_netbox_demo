@@ -1,5 +1,12 @@
 # Ansible NetBox Demo
 
+## Link to recording
+
+Thanks to the Red Hat team that had the recording done of this. You can find it on YouTube at
+[https://www.youtube.com/watch?v=GyQf5F0gr3w](https://www.youtube.com/watch?v=GyQf5F0gr3w).  
+
+## Start
+
 To setup NetBox, checkout https://netbox.readthedocs.io
 Setup an API Key in the upper right admin panel
 Generate an environment of devices to use
