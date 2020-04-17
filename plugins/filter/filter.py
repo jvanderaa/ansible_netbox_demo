@@ -39,14 +39,14 @@ class FilterModule:
 
         ansible_net_serialnum (string)         The serial number of the remote device
 
-        ansible_net_stacked_serialnums (list)  when multiple devices are configured in a stack 	
+        ansible_net_stacked_serialnums (list)  when multiple devices are configured in a stack
                                                 The serial numbers of each device in the stack
 
         """
         # Check if net_stacked_serialnums exists, then return it
         if ansible_facts.get("net_stacked_serialnums") is not None:
             return ansible_facts.get("net_stacked_serialnums")
-        
+
         # Check that net_serialnum exists, returning the string back as a list of one
         if ansible_facts.get("net_serialnum") is not None:
             return [ansible_facts.get("net_serialnum")]

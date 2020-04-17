@@ -5,7 +5,6 @@
   become: yes
   become_method: enable
   connection: network_cli
-  gather_facts: yes
   vars:
     netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
     netbox_token: "{{ lookup('ENV', 'NETBOX_API_KEY') }}"
