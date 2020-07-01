@@ -1,6 +1,7 @@
 ---
 collections:
-  - netbox.netbox
+  - name: netbox.netbox
+    version: 0.2.3
 
 roles:
   - name: ansible-network.network-engine
