@@ -4,7 +4,7 @@ bandit
 black
 paramiko
 pylint
-pynetbox
+pynetbox==4.3.3
 pytest
 pytest-pythonpath
 textfsm
