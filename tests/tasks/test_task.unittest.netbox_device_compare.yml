@@ -1,0 +1,27 @@
+---
+- name: "COMPARE_SERIALS: STORE TEST DATA"
+  set_fact:
+    single_device: ["99JCD34YT4C"]
+    single_netbox: ["99JCD34YT4C"]
+    single_device_fail: ["99JCD34YT4D"]
+    single_netbox_fail: ["99JCD34YT4C"]
+    multiple_devices: ["99JCD34YT4C", "adsfaafdaszffas"]
+    multiple_netbox: ["adsfaafdaszffas", "99JCD34YT4C"]
+    multiple_devices_fail: ["99JCD34YT4C", "adsfaafdaszffas"]
+    multiple_netbox_fail: ["safdaszffas", "99JCD34YT4C"]
+
+- name: "COMPARE_SERIALS: PERFORM FILTER"
+  set_fact:
+    single_device_result: "{{ single_device | compare_lists(single_netbox) }}"
+    single_device_fail_result: "{{ single_device_fail | compare_lists(single_netbox_fail) }}"
+    multiple_device_result: "{{ multiple_devices | compare_lists(multiple_netbox) }}"
+    multiple_device_fail_result: "{{ multiple_devices_fail | compare_lists(multiple_netbox_fail) }}"
+
+- name: "COMPARE_SERIALS: VERIFY RESULTS"
+  assert:
+    that:
+      - "single_device_result"
+      - "single_device_fail_result == False"
+      - "multiple_device_result"
+      - "multiple_device_fail_result == False"
+...
