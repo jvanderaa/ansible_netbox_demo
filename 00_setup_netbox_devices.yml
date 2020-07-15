@@ -87,7 +87,7 @@
         - { name: Windows 2016, slug: win2016 }
         - { name: Windows 2019, slug: win2019 }
       tags: [ devices ]
-      
+
     - name: "TASK 6: SETUP DEVICE ROLES"
       netbox.netbox.netbox_device_role:
         netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
@@ -106,7 +106,7 @@
         - { name: Leaf, color: 008000, vmrole: false }
         - { name: Spine, color: 0000FF, vmrole: false }
       tags: [ devices ]
-      
+
     - name: "TASK 7: SETUP VLANS"
       netbox.netbox.netbox_vlan:
         netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
@@ -123,7 +123,7 @@
         - { vid: 100, desc: Demo VLAN }
         - { vid: 200, desc: Primary VLAN }
         - { vid: 300, desc: Secondary VLAN }
-      
+
     - name: "TASK 8: SETUP RFC1918 RIR"
       netbox.netbox.netbox_rir:
         netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
