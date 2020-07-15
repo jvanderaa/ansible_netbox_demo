@@ -1,5 +1,7 @@
 # Ansible NetBox Demo
 
+![](https://github.com/jvanderaa/ansible_netbox_demo/workflows/CI/badge.svg)
+
 ## Link to recording
 
 Thanks to the Red Hat team that had the recording done of this. You can find it on YouTube at
