@@ -1,0 +1,40 @@
+---
+- name: "MACADDRESS: STORE TEST DATA"
+  set_fact:
+    mac1: 123a.124a.2387
+    mac2: 0c98.53d9.d800
+    mac3: 0C98.53D9.D802
+    mac4: 0c-98-53-d9-d8-02
+    mac5: 0C-98-53-D9-D8-02
+    bad1: None
+
+- name: "MACADDRESS: PERFORM FILTER"
+  set_fact:
+    mac1_data: "{{ mac1 | convert_mac_address }}"
+    mac2_data: "{{ mac2 | convert_mac_address }}"
+    mac3_data: "{{ mac3 | convert_mac_address }}"
+    mac4_data: "{{ mac4 | convert_mac_address }}"
+    mac5_data: "{{ mac5 | convert_mac_address }}"
+    bad1_data: "{{ bad1 | convert_mac_address }}"
+
+- name: "MACADDRESS: PRINT DATA"
+  debug:
+    msg: "{{ item }}"
+  with_items:
+    - "{{ mac1_data }}"
+    - "{{ mac2_data }}"
+    - "{{ mac3_data }}"
+    - "{{ mac4_data }}"
+    - "{{ mac5_data }}"
+    - "{{ bad1_data }}"
+
+- name: "MACADDRESS: VERIFY RESULTS"
+  assert:
+    that:
+      - "mac1_data == '12:3A:12:4A:23:87'"
+      - "mac2_data == '0C:98:53:D9:D8:00'"
+      - "mac3_data == '0C:98:53:D9:D8:02'"
+      - "mac4_data == '0C:98:53:D9:D8:02'"
+      - "mac5_data == '0C:98:53:D9:D8:02'"
+      - "bad1_data == '00:00:00:00:00:00'"
+...
