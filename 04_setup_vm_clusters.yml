@@ -4,15 +4,15 @@
   hosts: localhost
   vars:
     vms:
-        - { name: gns3, address: 192.168.0.101/24 }
-        - { name: awx, address: 192.168.0.102/24 }
-        - { name: netbox03, address: 192.168.0.103/24 }
-        - { name: prometheus, address: 192.168.0.104/24 }
-        - { name: docker01, address: 192.168.0.105/24 }
-        - { name: docker02, address: 192.168.0.106/24 }
+      - { name: gns3, address: 192.168.0.101/24 }
+      - { name: awx, address: 192.168.0.102/24 }
+      - { name: netbox03, address: 192.168.0.103/24 }
+      - { name: prometheus, address: 192.168.0.104/24 }
+      - { name: docker01, address: 192.168.0.105/24 }
+      - { name: docker02, address: 192.168.0.106/24 }
     pves:
-        - { name: pve01, address: "192.168.0.254/24" }
-        - { name: pve02, address: "192.168.0.253/24" }
+      - { name: pve01, address: "192.168.0.254/24" }
+      - { name: pve02, address: "192.168.0.253/24" }
     netbox_headers:
       Content-Type: "application/json"
       Authorization: "token {{ lookup('ENV', 'NETBOX_API_KEY') }}"
@@ -46,7 +46,7 @@
           device_role: Server
           site: minnesota01
       loop: "{{ pves }}"
-      
+
     - name: "TASK 3: SYS >> SETUP SOME VMs"
       netbox.netbox.netbox_virtual_machine:
         netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"

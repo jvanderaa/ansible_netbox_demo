@@ -1,0 +1,23 @@
+---
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build Container
+        run: make build
+      - name: Linting
+        run: make lint
+      - name: Unit Testing - Ansible
+        run: make unit
+      - name: Unit Testing Pytest
+        run: make unit-pytest

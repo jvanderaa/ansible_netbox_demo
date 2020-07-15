@@ -7,7 +7,7 @@ group_by:
  - device_roles
  - platforms
 compose:
-  ansible_network_os: platform.slug
+ ansible_network_os: platform.slug
 query_filters:
-  - site: "minnesota01"
-  - has_primary_ip: True
+ - site: "minnesota01"
+ - has_primary_ip: True

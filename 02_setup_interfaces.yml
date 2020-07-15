@@ -18,7 +18,7 @@
       eos_facts:
         gather_subset: "!config"
       when: "ansible_network_os == 'eos'"
-        
+
     - name: "TASK 2: NETBOX >> ADD INTERFACES TO NETBOX"
       netbox.netbox.netbox_device_interface:
         netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"
@@ -47,7 +47,7 @@
             device: "{{ inventory_hostname }}"
       with_items:
         - "{{ ansible_facts | build_ipv4_from_facts }}"
-    
+
     - name: "TASK 4: NETBOX >> REMOVE TEMPORARY INTERFACE"
       netbox.netbox.netbox_device_interface:
         netbox_url: "{{ lookup('ENV', 'NETBOX_URL') }}"

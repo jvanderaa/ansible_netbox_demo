@@ -4,6 +4,7 @@ Author: Josh VanDeraa
 
 Filters related to the Ansible Config testing Playbooks
 """
+# pylint disable=R0911
 import requests
 
 
@@ -130,6 +131,8 @@ class FilterModule:
 
         if bandwidth_value == 10000000:
             return "10gbase-t"
+
+        return None
 
     @staticmethod
     def build_ipv4_from_facts(ansible_facts):
@@ -262,3 +265,5 @@ class FilterModule:
 
         if "Management1" in interface_name:
             return "1000base-t"
+
+        return None

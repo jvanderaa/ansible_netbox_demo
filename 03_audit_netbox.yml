@@ -52,7 +52,7 @@
       assert:
         that:
           - "device_serial_list | compare_lists(netbox_serial_list)"
-        fail_msg: 
+        fail_msg:
           - "Device Serial List: {{ device_serial_list }}"
           - "NetBox Serial List: {{ netbox_serial_list }}"
         success_msg:
