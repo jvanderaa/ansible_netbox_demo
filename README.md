@@ -20,6 +20,12 @@ main information that will need to get updated.
 > the source of truth is the network device, not NetBox. Please be working to get your environment
 > to the state that you have a Source of Truth that is NOT your device.
 
+## Docker Container
+
+To get access to the docker container follow the process outlined here:
+https://docs.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages#:~:text=You%20can%20use%20the%20docker,TAG_NAME%20with%20tag%20for%20the
+
+
 ## Start
 
 To setup NetBox, checkout https://netbox.readthedocs.io
