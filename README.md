@@ -7,6 +7,19 @@
 Thanks to the Red Hat team that had the recording done of this. You can find it on YouTube at
 [https://www.youtube.com/watch?v=GyQf5F0gr3w](https://www.youtube.com/watch?v=GyQf5F0gr3w).  
 
+## Most Recent Updates
+
+I have moved all of the data that was previously configured to be added to NetBox within the 00_setup_netbox_devices.yml
+file to be configured in the all.yml. If looking to bootstrap your NetBox environment, this is the
+main information that will need to get updated.  
+
+**Important Note**
+> This is **NOT** meant to be run constantly in your environment. Please do not use as such. This is
+> a bootstrapping setup, to get you running. The intent of NetBox is to become the Source of Truth
+> for your environment. If all you are doing is constantly updating NetBox from your devices, then
+> the source of truth is the network device, not NetBox. Please be working to get your environment
+> to the state that you have a Source of Truth that is NOT your device.
+
 ## Start
 
 To setup NetBox, checkout https://netbox.readthedocs.io
@@ -23,8 +36,8 @@ look at the Makefile for the exact commands that replace the specific make comma
 ## How to
 
 1. Setup NetBox (see the beginning)
-2. Setup a new file named .env
-3. Setup group_vars/ and host_vars/ accordingly with credentials to connect to the devices
+2. Setup a new file named .env that contains information about your NetBox environment for the container. See below for example config
+3. Update your `group_vars/all.yml`,  `group_vars/` and `host_vars/` accordingly with credentials to connect to the devices, see below for example config
 4. Create a container - `make build`
 5. Enter the container - `make cli`
 6. Setup NetBox with executing `ansible-playbook 00_setup_netbox_devices.yml`
@@ -47,6 +60,14 @@ NETBOX_URL=<URL of NetBox>
 ansible_user: <username>
 ansible_password: <password>
 ansible_network_os: <corresponding Ansible OS>
+```
+
+hostvars will only contain information overriding data points. In the example, the only thing set in the host vars
+section is:
+
+```yaml
+---
+rack_location: 41
 ```
 
 ## URLs
