@@ -1,5 +1,5 @@
 IMG_NAME=ntc-jv/ansible
-IMG_VERSION=0.1.5
+IMG_VERSION=0.2.0
 
 .DEFAULT_GOAL := test
 .PHONY: test

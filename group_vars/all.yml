@@ -1,0 +1,86 @@
+---
+ntp_servers:
+  - 162.159.200.1
+  - 162.159.200.123
+dns_servers:
+  - 1.1.1.3
+  - 9.9.9.9
+sites:
+  - name: "MINNESOTA01"
+    time_zone: America/Chicago
+    status: active
+    description: Dev
+    contact_name: Josh
+    contact_email: josh@josh-v.com
+racks:
+  - name: "MN_01"
+    site: "MINNESOTA01"
+manufacturers:
+  - Arista
+  - Cisco
+  - CustomBuild
+  - Raspberry Pi
+device_types:
+  - {"model": "ASAv", "manufacturer": "Cisco", "slug": "asav", "part_number": "asav", "full_depth": False}
+  - {"model": "CSR1000v", "manufacturer": "Cisco", "slug": "csr1000v", "part_number": "csr1000v", "full_depth": False}
+  - {"model": "CustomServer", "manufacturer": "CustomBuild", "slug": "customserver", "part_number": "home", "full_depth": True}
+  - {"model": "IOSv", "manufacturer": "Cisco", "slug": "iosv", "part_number": "iosv", "full_depth": False}
+  - {"model": "nx-osv-chassis-nx-osv-supervisor-module", "manufacturer": "Cisco", "slug": "nx-osv-chassis-nx-osv-supervisor-module", "part_number": "nx-osv-chassis-nx-osv-supervisor-module", "full_depth": False}
+  - {"model": "nxosv", "manufacturer": "Cisco", "slug": "nxosv", "part_number": "nxosv", "full_depth": False}
+  - {"model": "vEOS", "manufacturer": "Arista", "slug": "veos", "part_number": "veos", "full_depth": False}
+platforms:
+  - { name: EOS, slug: eos }
+  - { name: IOS, slug: ios }
+  - { name: IOS-XE, slug: ios-xe }
+  - { name: NXOS, slug: nxos }
+  - { name: Raspbian, slug: raspbian }
+  - { name: Ubuntu 18.04, slug: ubuntu1804 }
+  - { name: Ubuntu 16.04, slug: ubuntu1604 }
+  - { name: Ubuntu 20.04, slug: ubuntu2004 }
+  - { name: Windows 2012, slug: win2012 }
+  - { name: Windows 2016, slug: win2016 }
+  - { name: Windows 2019, slug: win2019 }
+device_roles:
+  - { name: Firewall, color: FF0000, vmrole: true }
+  - { name: Leaf, color: 008000, vmrole: false }
+  - { name: Router, color: 000080, vmrole: true }
+  - { name: Server, color: "000000", vmrole: false }
+  - { name: Spine, color: 0000FF, vmrole: false }
+  - { name: Switch, color: 008000, vmrole: true }
+  - { name: VM, color: 00FFFF, vmrole: true }
+vlans:
+  - { vid: 100, desc: Demo VLAN }
+  - { vid: 200, desc: Primary VLAN }
+  - { vid: 300, desc: Secondary VLAN }
+rirs:
+  - name: RFC1918
+    is_private: True
+aggregates:
+  - { name: "10.0.0.0/8", desc: RFC1918 - 10, rir: RFC1918 }
+  - { name: "172.16.0.0/12", desc: RFC1918 - 172, rir: RFC1918 }
+  - { name: "192.0.2.0/24", desc: RFC5735 - 192.0.2.0, rir: RFC1918 }
+  - { name: "192.168.0.0/16", desc: RFC1918 - 192, rir: RFC1918 }
+prefixes:
+  - { prefix: 10.50.50.0/24, desc: GNS3 Loopbacks, ispool: true }
+  - { prefix: 172.31.0.0/24, desc: GNS3 - DC, ispool: false }
+  - { prefix: 172.31.1.0/24, desc: GNS3 - DC Mgmt, ispool: false }
+  - { prefix: 192.168.0.0/24, desc: GNS3 Remote, ispool: false }
+  - { prefix: 192.0.2.0/24, desc: Example Network, ispool: true }
+circuit_providers:
+  - name: Charter Spectrum
+    asn: 7843
+    account: in_good_standing
+    portal_url: http://spectrum.net
+    noc_contact: noc@spectrum.net
+    comments: "Cable Provider"
+circuit_types:
+  - name: Cable
+circuits:
+  - cid: my-circuit-id
+    provider: Charter Spectrum
+    circuit_type: Cable
+    status: Active
+    install_date: "2016-06-01"
+    commit_rate: 200000000
+    description: Charter Spectrum Cable Internet
+    comments: "Delivered"
