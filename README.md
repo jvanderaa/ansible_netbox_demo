@@ -2,6 +2,10 @@
 
 ![](https://github.com/jvanderaa/ansible_netbox_demo/workflows/CI/badge.svg)
 
+## Nautobot
+
+Nautobot is a fork from NetBox 2.10 to take the capabilities even further in the network automation space. Take a look at the info on the [NTC home page](https://www.networktocode.com/nautobot/). The same features that have been part of NetBox are still around and will evolve. If you want to take a test drive of Nautobot, take a look at [https://demo.nautobot.com](https://demo.nautobot.com).
+
 ## Link to recording
 
 Thanks to the Red Hat team that had the recording done of this. You can find it on YouTube at
