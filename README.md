@@ -2,6 +2,15 @@
 
 ![](https://github.com/jvanderaa/ansible_netbox_demo/workflows/CI/badge.svg)
 
+## Newer Library Notice
+
+Most of my day to day effort and work is with [Nautobot](https://nautobot.readthedocs.io). I find this more friendly for the immediate goals in front of me. That said, please take a look at the Nautobot version of this repo: https://github.com/jvanderaa/nautobot_ansible_import
+
+Feel free to take a look at the Nautobot open source project itself - [https://nautobot.readthedocs.io](https://nautobot.readthedocs.io).
+## Archival Notice
+
+This project is not actively being maintained. If there is an issue and there is time available, I will work on it. Alternatively if you wish to submit an issue and PR to the repo, I welcome it.
+
 ## Nautobot
 
 Nautobot is a fork from NetBox 2.10 to take the capabilities even further in the network automation space. Take a look at the info on the [NTC home page](https://www.networktocode.com/nautobot/). The same features that have been part of NetBox are still around and will evolve. If you want to take a test drive of Nautobot, take a look at [https://demo.nautobot.com](https://demo.nautobot.com).
